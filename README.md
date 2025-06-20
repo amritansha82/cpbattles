@@ -1,6 +1,6 @@
 # CPBattles
 
-<center><img src="./docs/image.png" alt="CPBattles Logo" width="300"/></center>
+<div align="center"><img src="./docs/image.png" alt="CPBattles Logo" width="300"/></div>
 
 ## Description
 
