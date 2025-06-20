@@ -10,6 +10,9 @@ export const pool = new Pool({
   database: process.env.DATABASE_NAME,
   host: process.env.DATABASE_HOST || "localhost",
   port: Number(process.env.DATABASE_PORT) || 5432,
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
 
 export const db = new DatabaseClient(pool);
