@@ -150,7 +150,6 @@ function AuthedHome({ user }: { user: { handle: string } }) {
 
 function BattleCard({
   battle,
-  user,
 }: // status: battleStatus,
 {
   battle: Battle;
