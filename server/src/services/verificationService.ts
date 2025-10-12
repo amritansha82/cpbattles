@@ -68,6 +68,7 @@ export const verificationService = {
       await client.query("COMMIT");
       return { contestId, index };
     } catch (error) {
+      console.log(error);
       await client.query("ROLLBACK");
       throw error;
     } finally {

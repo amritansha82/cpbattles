@@ -9,6 +9,7 @@ export const verifyUser: RequestHandler = async (req, res) => {
     const result = await verificationService.initiateVerification(handle);
     res.json(result);
   } catch (error) {
+    console.log(error);
     res.status(404).json({
       error:
         "message" in (error as any) ? (error as any).message : "Unknown error",

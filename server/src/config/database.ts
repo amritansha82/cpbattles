@@ -3,6 +3,7 @@ import { DatabaseClient } from "../utils/postgres";
 import dotenv from "dotenv";
 
 dotenv.config();
+console.log(process.env)
 
 export const pool = new Pool({
   user: process.env.DATABASE_USERNAME,
@@ -10,9 +11,9 @@ export const pool = new Pool({
   database: process.env.DATABASE_NAME,
   host: process.env.DATABASE_HOST || "localhost",
   port: Number(process.env.DATABASE_PORT) || 5432,
-  ssl: {
+  ssl: process.env.NODE_ENV == "development" ? false : {
     rejectUnauthorized: false,
-  },
+  }
 });
 
 export const db = new DatabaseClient(pool);

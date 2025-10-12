@@ -51,9 +51,9 @@ export const validateBattleCreation: RequestHandler = (req, res, next) => {
     return;
   }
 
-  if (details.minRating >= details.maxRating - 100) {
+  if (details.minRating > details.maxRating - 100) {
     res.status(400).json({
-      error: "Minimum rating must be more than 100 less than maximum rating",
+      error: "Rating range should be at least 100 rating points.",
     });
     return;
   }

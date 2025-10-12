@@ -27,11 +27,15 @@ agenda.define("battle:start", async (job: Job<{ battleId: number }>) => {
 
   try {
     client.query("BEGIN");
+
+    const participants = await db.getBattleParticipants(battleId);
+
     // choose problems
     const problems = await cf.chooseProblems(
       battle.min_rating,
       battle.max_rating,
-      battle.num_problems
+      battle.num_problems,
+      participants.map(participant => participant.handle)
     );
 
     for (const problem of problems) {
@@ -44,8 +48,6 @@ agenda.define("battle:start", async (job: Job<{ battleId: number }>) => {
 
     await db.query(queries.START_BATTLE, [battleId], client);
     console.log(`Battle ${battleId} started successfully`);
-
-    const participants = await db.getBattleParticipants(battleId);
 
     await agenda.every("1 minute", "battle:poll-submissions", {
       battle: battle,

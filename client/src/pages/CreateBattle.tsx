@@ -104,6 +104,14 @@ export default function CreateBattle() {
                 type="datetime-local"
                 name="startTime"
                 id="startTime"
+                defaultValue={new Intl.DateTimeFormat('sv-SE', {
+                  hour12: false,
+                  year: 'numeric',
+                  month: '2-digit',
+                  day: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                }).format(new Date(new Date().getTime() + 2 * 60 * 1000))}
               />
             </div>
             <div className="flex-1 min-w-0">

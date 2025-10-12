@@ -186,33 +186,30 @@ export class CFClient {
     });
   }
 
-  async getSolvedProblems(handle: string) {
-    // const submissions = await this.getSubmissions(handle);
-    // const solvedProblems = new Set<string>();
-    
-    // for (const sub of submissions) {  
-    //   if (sub.verdict === "OK") {
-    //     solvedProblems.add(sub.problem.id);
-    //   }
-    // }
-
-    // return Array.from(solvedProblems);
-  }
-
-  async chooseProblems(minRating: number, maxRating: number, count: number) {
+  async chooseProblems(minRating: number, maxRating: number, count: number, userHandles: string[]) {
     const problems = await this.getProblemList();
+    const solvedSet = new Set();
+
+    for (const user of userHandles) {
+      const submissions = await this.getSubmissions(user);
+      for (const submission of submissions) {
+        solvedSet.add(submission.contestId + submission.problem.index)
+      }
+    }
+
     const filteredProblems = problems.problems.filter(
       (p) =>
         p.rating !== undefined &&
         p.rating >= minRating &&
         p.rating <= maxRating &&
         p.type === "PROGRAMMING" &&
-        !p.tags.includes("*special")
+        !p.tags.includes("*special") &&
+        !solvedSet.has(p.contestId + p.index)
     );
 
     if (filteredProblems.length < count) {
       throw new Error(
-        `Not enough problems found in the specified rating range (${minRating}-${maxRating}).`
+        `Not enough problems to choose from.`
       );
     }
 
