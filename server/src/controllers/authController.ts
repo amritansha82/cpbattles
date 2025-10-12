@@ -58,6 +58,9 @@ export const handleCallback: RequestHandler = async (req, res) => {
       req.query as Record<string, string>
     ).toString()}`;
 
+    console.log("Callback query:", req.query); 
+    console.log("Expected state from session:", req.session.state);
+
     const tokens = await authorizationCodeGrant(config, new URL(callbackUrl), {
       pkceCodeVerifier: req.session.code_verifier,
       expectedState: req.session.state,
