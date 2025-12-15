@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { BASE_API_URL, authFetch } from "../hooks/useAuth";
+import { BASE_API_URL, useAuth } from "../hooks/useAuth";
 import {
   type Submission,
   type Battle,
@@ -16,6 +16,8 @@ export default function OngoingBattle({
 }) {
   const queryClient = useQueryClient();
 
+  const auth = useAuth();
+
   const startTime = new Date(battle.start_time);
   const endTime = addMinutes(startTime, battle.duration_min);
 
@@ -24,7 +26,7 @@ export default function OngoingBattle({
   >({
     queryKey: ["battles", battle.id, "problems"],
     queryFn: async () => {
-      const response = await authFetch(`${BASE_API_URL}/api/battle/${battle.id}/problems`, {
+      const response = await auth.fetch(`${BASE_API_URL}/api/battle/${battle.id}/problems`, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -53,7 +55,7 @@ export default function OngoingBattle({
   >({
     queryKey: ["battles", battle.id, "standings"],
     queryFn: async () => {
-      const response = await authFetch(`${BASE_API_URL}/api/battle/${battle.id}/standings`, {
+      const response = await auth.fetch(`${BASE_API_URL}/api/battle/${battle.id}/standings`, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -70,7 +72,7 @@ export default function OngoingBattle({
   >({
     queryKey: ["battles", battle.id, "submissions"],
     queryFn: async () => {
-      const response = await authFetch(`${BASE_API_URL}/api/battle/${battle.id}/submissions`, {
+      const response = await auth.fetch(`${BASE_API_URL}/api/battle/${battle.id}/submissions`, {
         headers: {
           "Content-Type": "application/json",
         },

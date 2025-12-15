@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { BASE_API_URL, useAuth, authFetch } from "../hooks/useAuth";
+import { BASE_API_URL, useAuth } from "../hooks/useAuth";
 
 import type { Battle } from "../types";
 import { useQuery } from "@tanstack/react-query";
@@ -41,10 +41,12 @@ export default function Home() {
 }
 
 function AuthedHome({ user }: { user: { handle: string } }) {
+  const auth = useAuth();
+
   const { status, data: battles } = useQuery<Battle[]>({
     queryKey: ["battles"],
     queryFn: async () => {
-      const response = await authFetch(BASE_API_URL + "/api/battles");
+      const response = await auth.fetch(BASE_API_URL + "/api/battles");
 
       if (!response.ok) {
         throw new Error("Failed to fetch battles");
@@ -156,6 +158,7 @@ function BattleCard({
   };
   status: "in_progress" | "pending" | "completed";
 }) {
+  const auth = useAuth();
   const fmt = new Intl.DateTimeFormat("en-US", {
     dateStyle: "medium",
     timeStyle: "short",
@@ -166,7 +169,7 @@ function BattleCard({
   >({
     queryKey: ["battleParticipants", battle.id],
     queryFn: async () => {
-      const response = await authFetch(
+      const response = await auth.fetch(
         `${BASE_API_URL}/api/battle/${battle.id}/participants`
       );
 
