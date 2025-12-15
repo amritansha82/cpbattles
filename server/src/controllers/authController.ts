@@ -142,6 +142,7 @@ export const handleCallback: RequestHandler = async (req, res) => {
     res.redirect(redirectUrl);
   } catch (err) {
     console.log("Callback error:", err);
+    console.error("Raw token response body:", (err as any).cause?.body);
     res.status(500).json({ error: "Something went wrong." });
   }
 };
