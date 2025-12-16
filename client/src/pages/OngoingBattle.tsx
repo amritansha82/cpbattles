@@ -15,6 +15,8 @@ export default function OngoingBattle({ battle }: { battle: Battle }) {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [cancelling, setCancelling] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshCooldown, setRefreshCooldown] = useState(0);
 
   const auth = useAuth();
   const isCreator = auth.authed && auth.userId === battle.created_by;
@@ -113,6 +115,43 @@ export default function OngoingBattle({ battle }: { battle: Battle }) {
       alert(error instanceof Error ? error.message : "Failed to end battle");
     } finally {
       setEnding(false);
+    }
+  };
+
+  const handleRefreshSubmissions = async () => {
+    setRefreshing(true);
+    try {
+      if (!auth.authed) return;
+      const response = await auth.fetch(
+        `${BASE_API_URL}/api/battle/${battle.id}/refreshSubmissions`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to refresh submissions");
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["battles", battle.id, "submissions"] });
+      queryClient.invalidateQueries({ queryKey: ["battles", battle.id, "standings"] });
+      setRefreshCooldown(10);
+      const cooldownInterval = setInterval(() => {
+        setRefreshCooldown((prev) => {
+          if (prev <= 1) {
+            clearInterval(cooldownInterval);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Failed to refresh submissions");
+    } finally {
+      setRefreshing(false);
     }
   };
 
@@ -336,7 +375,16 @@ export default function OngoingBattle({ battle }: { battle: Battle }) {
               </button>
             )}
           </div>
-          <h2 className="text-xl font-semibold mb-2  mt-8">Submissions</h2>
+          <div className="flex items-center justify-between mt-8 mb-2">
+            <h2 className="text-xl font-semibold">Submissions</h2>
+            <button
+              onClick={handleRefreshSubmissions}
+              disabled={refreshing || refreshCooldown > 0}
+              className="px-3 py-1 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+            >
+              {refreshing ? "Refreshing..." : refreshCooldown > 0 ? `Refresh (${refreshCooldown}s)` : "Refresh"}
+            </button>
+          </div>
           {submissionStatus === "pending" ? (
             <p>Loading submissions...</p>
           ) : submissionStatus === "error" ? (

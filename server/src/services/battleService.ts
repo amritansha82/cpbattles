@@ -289,7 +289,7 @@ export const battleService = {
 
     const problems = await db.getBattleProblems(battleId);
 
-    pollSubmissions(battle, problems, participants);
+    await pollSubmissions(battle, problems, participants);
   },
 
   async cancelBattle(battleId: number, userId: number) {
