@@ -8,6 +8,8 @@ import {
 } from "../types";
 import Countdown from "../components/Countdown";
 import { addMinutes, differenceInSeconds } from "date-fns";
+import { useNavigate } from "react-router";
+import { useState } from "react";
 
 export default function OngoingBattle({
   battle,
@@ -15,8 +17,42 @@ export default function OngoingBattle({
   battle: Battle;
 }) {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const [cancelling, setCancelling] = useState(false);
 
   const auth = useAuth();
+  const isCreator = auth.authed && auth.userId === battle.created_by;
+
+  const handleCancel = async () => {
+    if (!confirm("Are you sure you want to cancel this battle? This action cannot be undone.")) {
+      return;
+    }
+
+    setCancelling(true);
+    try {
+      const response = await auth.fetch(
+        `${BASE_API_URL}/api/battle/${battle.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to cancel battle");
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["battles"] });
+      navigate("/");
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Failed to cancel battle");
+    } finally {
+      setCancelling(false);
+    }
+  };
 
   const startTime = new Date(battle.start_time);
   const endTime = addMinutes(startTime, battle.duration_min);
@@ -226,6 +262,15 @@ export default function OngoingBattle({
                 });
               }}
             />
+            {isCreator && (
+              <button
+                onClick={handleCancel}
+                disabled={cancelling}
+                className="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+              >
+                {cancelling ? "Cancelling..." : "Cancel Battle"}
+              </button>
+            )}
           </div>
           <h2 className="text-xl font-semibold mb-2  mt-8">Submissions</h2>
           {submissionStatus === "pending" ? (

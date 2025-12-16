@@ -3,7 +3,6 @@ import { db, pool } from "../config/database";
 import { queries, User } from "../utils/postgres";
 import { agenda, pollSubmissions } from "../config/agenda";
 import nanoid from "nanoid";
-import { joinBattle } from "../controllers/battleController";
 
 export const battleService = {
   async createBattle(user: User, details: any) {
@@ -283,5 +282,26 @@ export const battleService = {
     const problems = await db.getBattleProblems(battleId);
 
     pollSubmissions(battle, problems, participants);
+  },
+
+  async cancelBattle(battleId: number, userId: number) {
+    const battle = await db.getBattleById(battleId);
+    if (!battle) {
+      throw new Error("Battle not found");
+    }
+
+    if (battle.created_by !== userId) {
+      throw new Error("Only the battle creator can cancel the battle");
+    }
+
+    if (battle.status === "completed") {
+      throw new Error("Cannot cancel a completed battle");
+    }
+
+    // Cancel scheduled agenda jobs for this battle
+    await agenda.cancel({ "data.battleId": battleId });
+
+    // Delete the battle (cascade will handle related data)
+    await db.query(queries.DELETE_BATTLE, [battleId]);
   },
 };
