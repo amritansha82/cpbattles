@@ -16,6 +16,7 @@ export default function OngoingBattle({ battle }: { battle: Battle }) {
   const navigate = useNavigate();
   const [cancelling, setCancelling] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [refreshCooldown, setRefreshCooldown] = useState(0);
 
   const auth = useAuth();
   const isCreator = auth.authed && auth.userId === battle.created_by;
@@ -137,6 +138,16 @@ export default function OngoingBattle({ battle }: { battle: Battle }) {
 
       queryClient.invalidateQueries({ queryKey: ["battles", battle.id, "submissions"] });
       queryClient.invalidateQueries({ queryKey: ["battles", battle.id, "standings"] });
+      setRefreshCooldown(10);
+      const cooldownInterval = setInterval(() => {
+        setRefreshCooldown((prev) => {
+          if (prev <= 1) {
+            clearInterval(cooldownInterval);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
     } catch (error) {
       alert(error instanceof Error ? error.message : "Failed to refresh submissions");
     } finally {
@@ -368,10 +379,10 @@ export default function OngoingBattle({ battle }: { battle: Battle }) {
             <h2 className="text-xl font-semibold">Submissions</h2>
             <button
               onClick={handleRefreshSubmissions}
-              disabled={refreshing}
+              disabled={refreshing || refreshCooldown > 0}
               className="px-3 py-1 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
             >
-              {refreshing ? "Refreshing..." : "Refresh"}
+              {refreshing ? "Refreshing..." : refreshCooldown > 0 ? `Refresh (${refreshCooldown}s)` : "Refresh"}
             </button>
           </div>
           {submissionStatus === "pending" ? (
