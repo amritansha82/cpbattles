@@ -11,6 +11,11 @@ import { FRONTEND_URL, getConfig } from "../config/openid";
 import { db, pool } from "../config/database";
 import { queries } from "../utils/postgres";
 
+const REDIRECT_URI =
+  process.env.NODE_ENV === "production"
+    ? "https://cpbattles-backend-bvhua3hscfavdqfa.centralindia-01.azurewebsites.net/auth/callback"
+    : "http://localhost:8080/auth/callback";
+
 export interface CodeforcesUser {
   sub: string;
   aud: string;

@@ -20,9 +20,9 @@ app.use(
   })
 );
 
+app.enable('trust proxy'); 
 app.use("/auth", authRoutes);
 app.use("/api", battleRoutes);
-app.enable('trust proxy'); 
 
 process.on("unhandledRejection", (reason, promise) => {
   // Suppress MongoDB/Agenda connection errors - they're expected if MongoDB isn't available

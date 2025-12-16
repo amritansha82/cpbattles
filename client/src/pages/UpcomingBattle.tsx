@@ -114,7 +114,7 @@ export default function UpcomingBattle({
   const { data: battlePlayers, status } = useQuery<User[]>({
     queryKey: ["battleParticipants", battle.id],
     queryFn: async () => {
-      if (!auth.authed) return;
+      if (!auth.authed) return []
       const response = await auth.fetch(
         `${BASE_API_URL}/api/battle/${battle.id}/participants`,
         {
